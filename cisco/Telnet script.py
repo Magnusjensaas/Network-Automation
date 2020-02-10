@@ -14,7 +14,7 @@ if password:
     tn.write(password.encode('ascii') + b"\n")
 
 tn.write(b"enable\n")
-tn.write(b"cisco\n")
+tn.write(b getpass.getpass("Enable password: "))
 tn.write(b"conf t\n")
 tn.write(b"int loop 0\n")
 tn.write(b"ip add 1.1.1.1 255.255.255.255\n")
