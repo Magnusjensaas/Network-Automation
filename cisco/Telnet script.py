@@ -3,7 +3,7 @@ import telnetlib
 
 HOST = "192.168.122.71"
 user = cisco("Enter your telnet username: ")
-password = getpass.getpass()
+password = getpass.getpass("Password: ")
 
 tn = telnetlib.Telnet(HOST)
 
