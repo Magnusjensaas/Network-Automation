@@ -49,19 +49,20 @@ def list_network_devices():
 
 if __name__ == "__main__":
     response = list_network_devices()
-    print ("{0:42}{1:17}{2:12}{3:18}{4:12}{5:16}{6:15}".
-        format("hostname", "mgmt IP", "serial",
+    print ("{0:42}{1:14}{2:17}{3:14}{4:12}{5:18}{6:12}{7:16}{8:15}".
+        format("hostname", "\033[0;37;40m", "mgmt IP", "\033[0;37;40m", "serial",
          "platformId", "SW Version", "role", "Uptime" ))
 
 
     for device in response["response"]:
         uptime = "N/A" if device["upTime"] is None else device["upTime"]
-        print ("{0:42}{1:17}{2:12}{3:18}{4:12}{5:16}{6:15}".
+        color_green =  "\033[0;32;40m"
+        color_white = "\033[0;37;40m"
+        print ("{0:42}{1:14}{2:17}{3:14}{4:12}{5:18}{6:12}{7:16}{8:15}".
             format(device["hostname"],
-                    device["managementIpAddress"],
+                    color_green, device["managementIpAddress"], color_white,
                     device["serialNumber"],
                     device["platformId"],
                     device["softwareVersion"],
                     device["role"],uptime))
-
 
