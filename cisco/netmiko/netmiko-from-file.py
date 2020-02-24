@@ -1,15 +1,22 @@
 from netmiko import ConnectHandler
 
-device = {
+with open("command_file") as f:
+    commands_to_send = f.read().splitlines()
+
+ios_devices = {
     "device_type": "cisco_ios",
     "ip": "192.168.122.72",
     "username": "cisco",
     "password": "cisco"
 }
 
-net_connect = ConnectHandler(**device)
-output = net_connect.send_command("show ip int brief")
-print(output)
+all_devices = [ios_devices]
+
+
+for devices in all_devices:
+    net_connect = ConnectHandler(**devices)
+    output = net_connect.send_config_set(commands_to_send)
+    print(output)
 
 
 
