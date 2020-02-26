@@ -1,4 +1,8 @@
 from netmiko import ConnectHandler
+import getpass
+
+username = input("Username: ")
+password = getpass.getpass()
 
 with open("command_file") as f:
     commands_to_send = f.read().splitlines()
@@ -13,8 +17,8 @@ for devices in devices_list:
     ios_device = {
         "device_type": "cisco_ios",
         "ip": device_ip,
-        "username": "cisco",
-        "password": "cisco"
+        "username": username,
+        "password": password
     }
     net_connect = ConnectHandler(**ios_device)
     output = net_connect.send_config_set(commands_to_send)
