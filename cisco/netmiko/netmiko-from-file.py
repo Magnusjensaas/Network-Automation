@@ -1,4 +1,4 @@
-from netmiko import ConnectHandler
+import netmiko
 import getpass
 
 username = input("Username: ")
@@ -20,7 +20,26 @@ for devices in devices_list:
         "username": username,
         "password": password
     }
-    net_connect = ConnectHandler(**ios_device)
+    try:
+        net_connect =netmiko.ConnectHandler(**ios_device)
+    except (netmiko.ssh_exception.AuthenticationException):
+        print("Authentication failure " + device_ip)
+        continue
+    except(netmiko.ssh_exception.NetMikoTimeoutException):
+        print("Connection timed out " + device_ip)
+        continue
+    except(EOFError):
+        print("End of file while attempting device " + device_ip)
+        continue
+    except(netmiko.ssh_exception.SSHException):
+        print("SSH error " + device_ip)
+        continue
+    except Exception as unknown_error:
+        print(unknown_error)
+        continue
+
+
+       
     output = net_connect.send_config_set(commands_to_send)
     print(output)
 
