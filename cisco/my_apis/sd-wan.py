@@ -4,6 +4,7 @@ import json
 import click
 import tabulate
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 SDWAN_IP = "sandboxsdwan.cisco.com"
@@ -14,6 +15,7 @@ if SDWAN_IP is None or SDWAN_USERNAME is None or SDWAN_PASSWORD is None:
     print("SDWAN credentials or IP missing")
     exit("1")
 
+
 class rest_api_lib:
     def __init__(self, vmanage_ip, username, password):
         self.vmanage_ip = vmanage_ip
@@ -22,13 +24,13 @@ class rest_api_lib:
 
     def login(self, vmanage_ip, username, password):
         """Login to vmanage"""
-        base_url_str = "https://%s:8443/"%vmanage_ip
+        base_url_str = "https://%s:8443/" % vmanage_ip
         login_action = "j_security_check"
 
-        #Format data for loginForm
-        login_data = {"j_username" : username, "j_password" : password}
+        # Format data for loginForm
+        login_data = {"j_username": username, "j_password": password}
 
-        #URL for posting login data
+        # URL for posting login data
         login_url = base_url_str + login_action
 
         sess = requests.session()
@@ -41,7 +43,7 @@ class rest_api_lib:
 
     def get_request(self, mount_point):
         """GET request"""
-        url = "https://%s:8443/dataservice/%s"%(self.vmanage_ip, mount_point)
+        url = "https://%s:8443/dataservice/%s" % (self.vmanage_ip, mount_point)
         print(url)
         response = self.session[self.vmanage_ip].get(url, verify=False)
         data = response.content
@@ -49,7 +51,7 @@ class rest_api_lib:
 
     def post_request(self, mount_point, payload, headers={"Content-Type": "application/json"}):
         """POST request"""
-        url = "https://%s;8443/dataservice/%s"%(self.vmanage_ip, mount_point)
+        url = "https://%s;8443/dataservice/%s" % (self.vmanage_ip, mount_point)
         payload = json.dumps(payload)
         print(payload)
 
@@ -57,12 +59,15 @@ class rest_api_lib:
         data = response.json()
         return data
 
+
 sdwanp = rest_api_lib(SDWAN_IP, SDWAN_USERNAME, SDWAN_PASSWORD)
+
 
 @click.group()
 def cli():
     """Command line tool for deploying templates to CISCO SD-WAN"""
     pass
+
 
 @click.command()
 def device_list():
@@ -82,28 +87,58 @@ def device_list():
     table = list()
 
     for item in items:
-        tr = [item["host-name"], item["device-type"], item["uuid"], item["system-ip"], item["site-id"], item["version"], item["device-model"]]
+        tr = [item["host-name"], item["device-type"], item["uuid"], item["system-ip"], item["site-id"], item["version"],
+              item["device-model"]]
         table.append(tr)
         try:
             click.echo(tabulate.tabulate(table, headers, tablefmt="fancy_grid"))
         except UnicodeEncodeError:
             click.echo(tabulate.tabulate(table, headers, tablefmt="grid"))
 
+
 @click.command()
 def template_list():
-    pass
+    """Retrieve and return templates list.
+
+       Returns the templates available ont he vManage instance
+
+       Example command:
+
+            ./sdwan.py template_list
+
+    """
+    click.secho("Retrieving the templates available")
+
+    response = json.loads(sdwanp.get_request("template/device"))
+    items = response["data"]
+
+    headers = ["Template Name", "Device Type", "Template ID", "Attached devices", "Template version"]
+    table = list()
+
+    for item in items:
+        tr = [item["templateName"], item["deviceType"], item["templateId"], item["devicesAttached"],
+              item["templateAttached"]]
+        table.append(tr)
+    try:
+        click.echo(tabulate.tabulate(table, headers, tablefmt="fancy_grid"))
+    except UnicodeEncodeError:
+        click.echo(tabulate.tabulate(table, headers, tablefmt="grid"))
+
 
 @click.command()
 def attached_devices():
     pass
 
+
 @click.command()
 def attach():
     pass
 
+
 @click.command()
 def detach():
     pass
+
 
 cli.add_command(attach)
 cli.add_command(detach)
