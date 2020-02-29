@@ -51,7 +51,7 @@ class rest_api_lib:
 
     def post_request(self, mount_point, payload, headers={"Content-Type": "application/json"}):
         """POST request"""
-        url = "https://%s;8443/dataservice/%s" % (self.vmanage_ip, mount_point)
+        url = "https://%s:8443/dataservice/%s" % (self.vmanage_ip, mount_point)
         payload = json.dumps(payload)
         print(payload)
 
@@ -154,8 +154,54 @@ def attached_devices(template):
 
 
 @click.command()
-def attach():
-    pass
+@click.option("--template", help="Name of the template to deploy")
+@click.option("--target", help="Chassis number of target network device")
+@click.option("--hostname", help="Hostname you wish the target to have")
+@click.option("--sysip", help="System IP you wish the target to have")
+@click.option("--loopip", help="Loopback interface IP address")
+@click.option("--geip", help="Gigabit 0/0 interface IP address")
+@click.option("--siteid", help="Site ID")
+def attach(template, target, hostname, sysip, loopip, geip, siteid):
+    """
+    Attach a template with Cisco SDWAN
+
+    Provide all template parameters and their values as arguments.
+
+    Example command:
+        ./sd-wan.py attach --template "TemplateID" --target "target ID" --hostname "hostname"
+        --sysip "System IP address ex 1.1.1.1" --loopip "loopback IP address ex 2.2.2.2"
+        --geip "GigabitEthernet0/0 IP ex 3.3.3.3" --siteid "site id ex 999"
+    """
+    click.secho("Attempting to attach template.")
+
+    payload = {
+        "deviceTemplateList": [
+            {
+                "templateId": str(template),
+                "device": [
+                    {
+                        "csv-status": "complete",
+                        "csv-deviceId": str(target),
+                        "csv-deviceIP": str(sysip),
+                        "csv-host-name": str(hostname),
+                        "/1/loopback1/interface/ip/address": str(loopip),
+                        "/0/ge0/0/interface/ip/address": str(geip),
+                        "//system/host-name": str(hostname),
+                        "//system/system-ip": str(sysip),
+                        "//system/site-id": str(siteid),
+                        "csv-templateId": str(template),
+                        "selected": "true"
+                    }
+                ],
+                "isEdited": "false",
+                "isMasterEdited": "false"
+
+            }
+        ]
+    }
+
+    response = sdwanp.post_request("template/device/config/attachfeature", payload)
+    print(response)
 
 
 @click.command()
