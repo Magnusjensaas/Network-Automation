@@ -205,8 +205,33 @@ def attach(template, target, hostname, sysip, loopip, geip, siteid):
 
 
 @click.command()
-def detach():
-    pass
+@click.option("--target", help="Chassis number of the device to detach")
+@click.option("--sysip", help="System IP of the system to detach")
+def detach(target, sysip):
+    """
+    Detach a template with Cisco SDWAN.
+
+    Provide all template parameters and their values as arguments.
+
+    Example command:
+
+        ./sdwan.py detach --target TargetID --sysip 1.1.1.1
+
+    """
+    click.secho("Attempting to detach template.")
+
+    payload = {
+        "deviceType": "vedge",
+        "devices": [
+            {
+                "deviceId": str(target),
+                "deviceIP": str(sysip)
+            }
+        ]
+    }
+
+    response = sdwanp.post_request("template/config/device/mode/cli", payload)
+    print(response)
 
 
 cli.add_command(attach)
