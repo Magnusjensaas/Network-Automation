@@ -76,7 +76,7 @@ def device_list():
        Returns information about each device that is part of the fabric.
 
        Example command:
-            ./sdwan.py device_list
+            ./sdwan.py device-list
     """
     click.secho("Retrieving the devices")
 
@@ -104,7 +104,7 @@ def template_list():
 
        Example command:
 
-            ./sdwan.py template_list
+            ./sdwan.py template-list
 
     """
     click.secho("Retrieving the templates available")
@@ -126,8 +126,31 @@ def template_list():
 
 
 @click.command()
-def attached_devices():
-    pass
+@click.option("--template", help="Name of the template you wish to retrieve in formation for")
+def attached_devices(template):
+    """Retrieve and return devices associated to a template.
+
+       Example command:
+
+            ./sd-wan.py attached-devices --template abcd1234
+
+    """
+
+    url = "template/device/config/attached/{0}".format(template)
+
+    response = json.loads(sdwanp.get_request(url))
+    items = response["data"]
+
+    headers = ["Host Name", "Device IP", "Site ID", "Host ID", "Host Type"]
+    table = list()
+
+    for item in items:
+        tr = [item["host-name"], item["deviceIP"], item["site-id"], item["uuid"], item["personality"]]
+        table.append(tr)
+    try:
+        click.echo(tabulate.tabulate(table, headers, tablefmt="fancy_grid"))
+    except UnicodeEncodeError:
+        click.echo(tabulate.tabulate(table, headers, tablefmt="grid"))
 
 
 @click.command()
