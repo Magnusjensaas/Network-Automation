@@ -5,7 +5,6 @@ import click
 import tabulate
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests.auth import HTTPBasicAuth
-from tabulate import tabulate
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -61,12 +60,30 @@ def get_vlan():
     click.secho("Getting VLAN details")
 
     response = json.loads(api_class.get_request("topology/vlan/vlan-names"))
-    print(type(response))
-    print(response)
     data = response["response"]
-    print(tabulate([data], headers=['VLAN']))
+    print(tabulate.tabulate([data], headers=['VLAN']))
+
+@click.command()
+def get_physical_topology():
+
+    click.secho("Getting Physical-Topology details")
+
+    response = json.loads(api_class.get_request("topology/physical-topology"))
+    data = response["response"]["nodes"]
+    print(data)
+    headers = ["Device Type", "IP", "Family", "Role"]
+    table = list()
+
+    for item in data:
+        tr = [item["deviceType"], item["ip"], item["family"], item["role"]]
+        table.append(tr)
+    try:
+        click.echo(tabulate.tabulate(table, headers, tablefmt="fancy_grid"))
+    except UnicodeEncodeError:
+        click.echo(tabulate.tabulate(table, headers, tablefmt="grid"))
 
 cli.add_command(get_vlan)
+cli.add_command(get_physical_topology)
 
 
 if __name__ == "__main__":
