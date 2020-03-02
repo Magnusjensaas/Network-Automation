@@ -111,7 +111,8 @@ def template_list():
 
     response = json.loads(sdwanp.get_request("template/device"))
     items = response["data"]
-
+    print(items)
+    print(type(items))
     headers = ["Template Name", "Device Type", "Template ID", "Attached devices", "Template version"]
     table = list()
 
