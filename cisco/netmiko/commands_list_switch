@@ -1,0 +1,8 @@
+vlan 10
+name Python_test_10
+vlan 20
+name Python_test_20
+vlan 30
+name Python_test_30
+end
+wr
