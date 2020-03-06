@@ -1,4 +1,4 @@
-import json
+import threading
 from getpass import getpass
 from pprint import pprint
 from netmiko import ConnectHandler
@@ -21,11 +21,11 @@ def read_devices(devices_filename):
 
 def determine_device(device):
     # if condition to check if device type is supported.
-    if device["type"] == "cisco-ios":
-        device_type = "cisco-ios"
+    if device["type"] == "cisco_ios":
+        device_type = "cisco_ios"
         return device_type
     else:
-        print("Unknown device type, supported device types: cisco-ios")
+        print("Unknown device type, supported device types: cisco_ios")
 
 
 def session_create(device):
@@ -38,7 +38,7 @@ def session_create(device):
 def config_device(device):
     device_type = determine_device(device)
     session = session_create(device)
-    if device_type == "cisco-ios":
+    if device_type == "cisco_ios":
         print("Connecting to device {0}".format(device))
         config_data = session.send_command("show run")
         return config_data
@@ -57,7 +57,6 @@ def write_to_file(device):
 def run(device):
     determine_device(device)
     session_create(device)
-    config_device(device)
     write_to_file(device)
 
 
@@ -69,8 +68,15 @@ if __name__ == "__main__":
     # Start timer.
     starting_time = time()
 
+    config_threads_list = []
+
     for ipaddr, device in devices.items():
         print("Getting config for: ", device)
-        run(device)
-    print("End, elapsed time=", time()-starting_time)
+        config_threads_list.append(threading.Thread(target=run, args=(device,)))
 
+    for config_thread in config_threads_list:
+        config_thread.start()
+
+    for config_thread in config_threads_list:
+        config_thread.join()
+    print("End, elapsed time=", time() - starting_time)
