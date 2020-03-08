@@ -79,4 +79,3 @@ if __name__ == "__main__":
 
     for config_thread in config_threads_list:
         config_thread.join()
-    print("End, elapsed time=", time() - starting_time)
