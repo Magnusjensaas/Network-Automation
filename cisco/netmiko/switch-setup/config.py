@@ -2,7 +2,7 @@ import netmiko
 import getpass
 
 # Get user input for username and password.
-username = input("Username: ")
+username = input("Username for  {} : ".format(devices)
 password = getpass.getpass()
 
 
