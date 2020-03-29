@@ -7,7 +7,7 @@ class UserView:
 
     def update_display(self, state, msg):
         if isinstance(msg, model.User):
-            msg = f"{msg.username};{msg.email}"
+            msg = f'{msg.username};{msg.email}'
         print(f"{'Success' if state else 'Error'}>>>{msg}")
 
     def create_user(self):
